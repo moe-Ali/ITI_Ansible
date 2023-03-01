@@ -1,6 +1,6 @@
 # Ansible Lab:
-- deploy apache and configure it to run on port 8090 on 2 ec2 machines
-- deploy django code and configure it to run on port 8000 on 2 ec2 machines
+- deploy Apache and configure it to run on port 8090 on 2 ec2 machines
+- deploy Django code and configure it to run on port 8000 on 2 ec2 machines
 
  # Outputs
  ## Web1 (First ec2)
