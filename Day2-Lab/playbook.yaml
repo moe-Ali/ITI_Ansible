@@ -1,0 +1,8 @@
+- name: install apache
+  become: true
+  hosts: web
+  gather_facts: false
+  roles:
+    - roles/Nexus
+    - roles/PostgreSQL
+    - roles/SonarQube

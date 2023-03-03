@@ -1,0 +1,66 @@
+- name: install openjdk
+  apt:
+    name: [openjdk-11-jdk,unzip]
+
+
+# - name: Create directory /opt/sonarqube
+#   file:
+#     path: /opt/sonarqube
+#     state: directory
+
+- name: Unzip the downloaded file
+  unarchive:
+    src: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{sonarqube_version}}.zip"
+    dest: /opt/sonarqube.zip
+    remote_src: true
+- name: change name to sonarqube
+  copy:
+    src: /opt/sonarqube-*
+    dest: /opt/sonarqube
+    remote_src: true
+
+- name: Create a sonar user and set /opt/sonarqube as the home directory
+  user:
+    name: sonar
+    home: /opt/sonarqube
+
+- name: Grant the sonar user access to the /opt/sonarqube directory
+  file:
+    dest: /opt/sonarqube
+    owner: sonar
+    group: sonar
+
+- name: Edit the SonarQube configuration file part1
+  lineinfile:
+    dest: "/opt/sonarqube/conf/sonar.properties"
+    regex: "{{item.regex}}"
+    line: "{{item.line}}"
+    backrefs: true
+  loop:
+    - {regex: '^#sonar.jdbc.username=',line: 'sonar.jdbc.username=sonar'}
+    - {regex: '^#sonar.jdbc.password=',line: 'sonar.jdbc.password=my_strong_password'}
+
+- name: Edit the SonarQube configuration file part2
+  lineinfile:
+    dest: /opt/sonarqube/conf/sonar.properties
+    line: sonar.jdbc.url=jdbc:postgresql://localhost:5432/sonarqube
+
+- name: Edit the sonar script file
+  lineinfile:
+    dest: /opt/sonarqube/bin/linux-x86-64/sonar.sh
+    regex: "^#RUN_AS_USER="
+    line: RUN_AS_USER=sonar
+    backrefs: true
+
+- name: copy service file
+  copy:
+    src: sonar.service
+    dest: /etc/systemd/system/sonar.service
+
+- name: restart the service
+  service:
+    state: started
+    name: sonar
+    enabled: true
+
+
