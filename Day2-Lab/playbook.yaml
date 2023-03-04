@@ -1,4 +1,4 @@
-- name: install apache
+- name: Install Nexus&SonarQube
   become: true
   hosts: web
   gather_facts: false

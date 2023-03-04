@@ -2,20 +2,15 @@
   apt:
     name: [openjdk-11-jdk,unzip]
 
-
-# - name: Create directory /opt/sonarqube
-#   file:
-#     path: /opt/sonarqube
-#     state: directory
-
-- name: Unzip the downloaded file
+- name: Unzip and download sonarqube
   unarchive:
-    src: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{sonarqube_version}}.zip"
-    dest: /opt/sonarqube.zip
+    src: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
+    dest: /opt
     remote_src: true
+
 - name: change name to sonarqube
   copy:
-    src: /opt/sonarqube-*
+    src: "/opt/sonarqube-{{ sonarqube_version }}/"
     dest: /opt/sonarqube
     remote_src: true
 
@@ -33,8 +28,8 @@
 - name: Edit the SonarQube configuration file part1
   lineinfile:
     dest: "/opt/sonarqube/conf/sonar.properties"
-    regex: "{{item.regex}}"
-    line: "{{item.line}}"
+    regex: "{{ item.regex }}"
+    line: "{{ item.line }}"
     backrefs: true
   loop:
     - {regex: '^#sonar.jdbc.username=',line: 'sonar.jdbc.username=sonar'}
@@ -62,5 +57,18 @@
     state: started
     name: sonar
     enabled: true
+
+- name: Edit the sysctl configuration file (change limits)
+  lineinfile:
+    dest: /etc/sysctl.conf
+    line: "{{ item }}"
+  loop:
+    - {'vm.max_map_count=262144'}
+    - {'fs.file-max=65536'}
+    - {'ulimit -n 65536'}
+    - {'ulimit -u 4096'}
+
+- name: Reboot the system to apply the changes
+  reboot:
 
 
