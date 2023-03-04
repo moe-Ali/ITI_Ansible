@@ -1,7 +1,6 @@
 - name: Install Nexus&SonarQube
   become: true
   hosts: web
-  gather_facts: false
   roles:
     - roles/Nexus
     - roles/PostgreSQL
